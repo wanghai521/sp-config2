@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: zuul
+  cloud:
+    config:
+      override-none: true
+
+server:
+  port: 3001
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka1:2001/eureka,http://eureka2:2002/eureka
+#网关配置
+zuul:
+  #开启重试，zuul是默认不开启重试的，需要手动的开启
+  #  retryable: true
+  routes:
+    item-service: /item-service/**
+    user-service: /user-service/**
+    order-service: /order-service/**
+#ribbon的配置，功能是进行远程调用，可以实现负载均衡和重试
+ribbon:
+  ConnectTimeout: 1000
+  ReadTimeout: 2000
+  MaxAutoRetriesNextServer: 1
+  MaxAutoRetries: 1
+
+#这个是配置，是hystrix的超时时长，hystrix是进行降级和熔断，超过下面的配置时间，就会降级，
+#熔断的条件是10秒钟20此请求，其中50%是是失败的，
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 500
+#这个是为了暴露监测点，是actuator的配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
